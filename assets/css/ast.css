@@ -1,0 +1,13 @@
+@import "https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css";
+* { font-family: 'NanumSquare', sans-serif; }
+
+h1, h2, h3, h4, h5, h6, b , .font-weight-bold { font-weight: 700; }
+section label { font-weight: bold; }
+span + span { margin-left: 0.5rem; }
+
+.badge { padding-top: 0.35em; }
+.badge-pill { padding-right: 1.6em; padding-left: 1.6em; }
+
+table#resultTable { font-size: 0.90rem; }
+table#resultTable th { font-weight: 700; }
+table#resultTable td { text-overflow: ellipsis; word-break: keep-all; }
