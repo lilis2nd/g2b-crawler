@@ -1,5 +1,5 @@
 <?php
-// Date
+// Form - Date
 $startDate = date('Y-m-d', time() - (7 * 24 * 60 * 60));
 $endDate = date('Y-m-d');
 
@@ -39,6 +39,86 @@ if (isset($_POST['buttonDelete'])) {
 $keyword = $xml->documentElement->getElementsByTagName('keyword');
 $xmlCount = $keyword->length;
 
+// Setting - Currency
+$moneyFormat = new NumberFormatter("ko_KR", NumberFormatter::CURRENCY);
+$moneyFormat->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 42);
+$moneyFormat->setSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL,",");
+
+// Setting - Date
+
+/// Search logic
+if (isset($_POST['buttonSearch'])) {
+//    실공고 검색 및 데이터 취합
+  $inqryBgnDt = date("Ymd", strtotime($_POST['inputStartDate'])) . '0000';
+  $inqryEndDt = date("Ymd", strtotime($_POST['inputEndDate'])) . '0000';
+
+    $html = '';
+	for ($i = 0; $i < $xmlCount; $i++) {
+//	    실공고 - 용역
+		$ch = curl_init();
+		$url = 'http://apis.data.go.kr/1230000/BidPublicInfoService/getBidPblancListInfoServcPPSSrch'; /*URL*/
+		$queryParams = '?' . urlencode('ServiceKey') . '=niPQKI7SOhepuEQsEv1Vfh%2B%2BJFh0gdBf%2FRlRVTecK02b0Vo14WBT9%2F5zFw4gIo50GPdcYe37txYZPIGsj1%2Fqbg%3D%3D'; /*Service Key*/
+		$queryParams .= '&' . urlencode('numOfRows') . '=' . urlencode('30'); /* 페이지별 출력수 */
+		$queryParams .= '&' . urlencode('pageNo') . '=' . urlencode('1');
+		$queryParams .= '&' . urlencode('inqryDiv') . '=' . urlencode('1');
+		$queryParams .= '&' . urlencode('inqryBgnDt') . '=' . urlencode($inqryBgnDt);
+		$queryParams .= '&' . urlencode('inqryEndDt') . '=' . urlencode($inqryEndDt);
+		$queryParams .= '&' . urlencode('bidNtceNm') . '=' . urlencode($keyword[$i]->nodeValue);
+		curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+		$responseRealG2B = curl_exec($ch);
+		curl_close($ch);
+
+        $xmlRawData = simplexml_load_string($responseRealG2B);
+        foreach ($xmlRawData->body->items->item as $item) {
+            $html .= '<tr>';
+            $html .= "<td>" . date("Y-m-d", strtotime($item->bidNtceDt)) . "</td>";
+            $html .= "<td>{$item->ntceKindNm}</td>";
+            $html .= "<td>{$item->bidNtceNo}-{$item->bidNtceOrd}</td>";
+            $html .= "<td>{$item->bidNtceNm}</td>";
+            $html .= "<td>{$item->dminsttNm}</td>";
+            $html .= "<td>" . $moneyFormat->format((float)$item->asignBdgtAmt) . "</td>";
+            $html .= "<td>" . date("Y-m-d H:m", strtotime($item->bidClseDt)) . "</td>";
+            $html .= "<td><a href='{$item->bidNtceDtlUrl}' target='_blank'><i class=\"fas fa-link\"></i></a></td>";
+            $html .= '</tr>';
+        }
+	}
+
+	for ($j = 0; $j < $xmlCount; $j++) {
+//	    실공고 - 공사
+		$ch = curl_init();
+		$url = 'http://apis.data.go.kr/1230000/BidPublicInfoService/getBidPblancListInfoCnstwkPPSSrch'; /*URL*/
+		$queryParams = '?' . urlencode('ServiceKey') . '=niPQKI7SOhepuEQsEv1Vfh%2B%2BJFh0gdBf%2FRlRVTecK02b0Vo14WBT9%2F5zFw4gIo50GPdcYe37txYZPIGsj1%2Fqbg%3D%3D'; /*Service Key*/
+		$queryParams .= '&' . urlencode('numOfRows') . '=' . urlencode('30'); /* 페이지별 출력수 */
+		$queryParams .= '&' . urlencode('pageNo') . '=' . urlencode('1');
+		$queryParams .= '&' . urlencode('inqryDiv') . '=' . urlencode('1');
+		$queryParams .= '&' . urlencode('inqryBgnDt') . '=' . urlencode($inqryBgnDt);
+		$queryParams .= '&' . urlencode('inqryEndDt') . '=' . urlencode($inqryEndDt);
+		$queryParams .= '&' . urlencode('bidNtceNm') . '=' . urlencode($keyword[$j]->nodeValue);
+		curl_setopt($ch, CURLOPT_URL, $url . $queryParams);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, FALSE);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+		$responseRealG2B = curl_exec($ch);
+		curl_close($ch);
+
+		$xmlRawData = simplexml_load_string($responseRealG2B);
+		foreach ($xmlRawData->body->items->item as $item) {
+			$html .= '<tr>';
+			$html .= "<td>" . date("Y-m-d", strtotime($item->bidNtceDt)) . "</td>";
+			$html .= "<td>{$item->ntceKindNm}</td>";
+			$html .= "<td>{$item->bidNtceNo}-{$item->bidNtceOrd}</td>";
+			$html .= "<td>{$item->bidNtceNm}</td>";
+			$html .= "<td>{$item->dminsttNm}</td>";
+			$html .= "<td>" . $moneyFormat->format((float)$item->asignBdgtAmt) . "</td>";
+			$html .= "<td>" . date("Y-m-d H:m", strtotime($item->bidClseDt)) . "</td>";
+			$html .= "<td><a href='{$item->bidNtceDtlUrl}' target='_blank'><i class=\"fas fa-link\"></i></a></td>";
+			$html .= '</tr>';
+		}
+	}
+}
 ?>
 <!doctype html>
 <html lang="ko">
@@ -49,6 +129,8 @@ $xmlCount = $keyword->length;
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="assets/css/ast.css"/>
     <title>AST 나라장터 공고/사전규격 검색기</title>
 </head>
@@ -62,14 +144,14 @@ $xmlCount = $keyword->length;
 </nav>
 
 <section class="mt-4 container">
-    <form>
+    <form method="post">
         <div class="form-group row mb-0">
             <label class="col-sm-2 col-form-label">날짜범위</label>
             <div class="form-group col-sm-5">
-                <input type="date" class="form-control" id="inputStartDate" value="<?= $startDate; ?>"/>
+                <input type="date" class="form-control" name="inputStartDate" value="<?= $startDate; ?>"/>
             </div>
             <div class="form-group col-sm-5">
-                <input type="date" class="form-control" id="inputEndDate" value="<?= $endDate; ?>"/>
+                <input type="date" class="form-control" name="inputEndDate" value="<?= $endDate; ?>"/>
             </div>
         </div>
         <div class="row">
@@ -96,7 +178,7 @@ $xmlCount = $keyword->length;
         </div>
         <div class="row mt-4">
             <div class="col-sm-2 offset-sm-5">
-                <button type="submit" class="btn btn-primary btn-block">검색</button>
+                <button type="submit" class="btn btn-primary btn-block" name="buttonSearch" value="run">검색</button>
             </div>
         </div>
     </form>
@@ -105,38 +187,56 @@ $xmlCount = $keyword->length;
 <hr class="container" />
 
 <!-- 결과 테이블 -->
-<section class="container-fluid">
-    <div class="row">
-        <div class="col">
-            <button type="button" class="btn btn-sm btn-info float-right">다운로드</button>
-        </div>
-    </div>
+<section class="container-fluid mt-2">
     <div class="row justify-content-center">
         <div class="col-auto">
-            <table class="table table-sm table-hover table-striped table-responsive" id="resultTable">
+            <table class="table table-sm table-hover table-striped table-responsive"  id="resultTable">
+                <caption>실공고 목록</caption>
                 <thead class="text-center">
                     <tr>
-                        <th>No.</th>
                         <th>공고일</th>
+                        <th>분류</th>
                         <th>공고번호</th>
                         <th>공고</th>
-                        <th>분류</th>
                         <th>수요기관</th>
+                        <th>배정예산</th>
                         <th>마감일</th>
                         <th>링크</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>2020/03/31 16:00</td>
-                        <td>20200355909-00</td>
-                        <td>2020년 재난형 동물질병 방역조치 의사결정지원 정보시스템 개발서비스</td>
-                        <td>일반</td>
-                        <td>농림축산식품부 농림축산검역본부</td>
-                        <td>2020/04/14 10:00</td>
-                        <td>바로가기</td>
-                    </tr>
+                <?= $html; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-auto">
+            <table class="table table-sm table-hover table-striped table-responsive" id="resultTablePre">
+                <caption>사전규격 목록</caption>
+                <thead class="text-center">
+                <tr>
+                    <th>No.</th>
+                    <th>공고일</th>
+                    <th>공고번호</th>
+                    <th>공고</th>
+                    <th>분류</th>
+                    <th>수요기관</th>
+                    <th>마감일</th>
+                    <th>링크</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>2020/03/31 16:00</td>
+                    <td>20200355909-00</td>
+                    <td>2020년 재난형 동물질병 방역조치 의사결정지원 정보시스템 개발서비스</td>
+                    <td>일반</td>
+                    <td>농림축산식품부 농림축산검역본부</td>
+                    <td>2020/04/14 10:00</td>
+                    <td>바로가기</td>
+                </tr>
                 </tbody>
             </table>
         </div>
@@ -198,9 +298,15 @@ HTML;
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="assets/js/bootstrap.js"></script>
-
+<script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#resultTable').DataTable({
+        "order": [[ 0, "desc" ]]
+    });
+});
+</script>
 <?php
-
 ?>
 </body>
 </html>
