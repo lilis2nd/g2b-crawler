@@ -16,6 +16,11 @@ table#resultTable tr td:nth-child(7) { word-break: keep-all; }
 table#resultTable tr td:nth-child(2),
 table#resultTable tr td:last-child { text-align: center; }
 
+table#resultTablePre tr td:first-child,
+table#resultTablePre tr td:nth-child(2),
+table#resultTablePre tr td:last-child { text-align: center; }
+
+
 #resultTable_length > label:nth-child(1),
 #resultTable_filter > label:nth-child(1),
 #resultTable_info,

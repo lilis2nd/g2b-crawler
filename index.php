@@ -179,7 +179,7 @@ PREHTML;
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collpase navbar-collapse" id="navbar">
+    <div class="collapse navbar-collapse" id="navbar">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
                 <a class="nav-link" href="https://docs.google.com/spreadsheets/d/1Er-om31yxj8tuFQ6ls2sRXTf3gr_qQ4tmjQIsMotoqI/edit#gid=0" target="_blank">내부검토</a>
@@ -220,7 +220,7 @@ PREHTML;
                 <p>
                   <?php
                     for ($i = 0; $i < $xmlCount; $i++) {
-                        echo "<span class=\"badge badge-pill badge-primary\">".trim($keyword[$i]->textContent)."</span>";
+                        echo "<span class=\"badge badge-pill badge-info\">".trim($keyword[$i]->textContent)."</span>";
                     }
                   ?>
                 </p>
@@ -235,24 +235,26 @@ PREHTML;
             </div>
         </div>
         <div class="row mt-4">
-            <div class="col-sm-2 offset-sm-5">
+            <div class="col-sm-4 offset-sm-2">
                 <button type="submit" class="btn btn-primary btn-block" name="buttonSearch" value="run">검색</button>
             </div>
         </div>
     </form>
 </section>
 
-<hr class="container" />
-
 <?php if(isset($_POST['buttonSearch'])) {
 	echo <<<TABLE
-
+<hr class="container border-secondary" />
 <!-- 결과 테이블 -->
 <section class="container-fluid mt-2">
+<div class="container">
+    <div class="alert alert-primary">
+        <h5 class="mb-0">실제공고</h5>
+    </div>
+</div>
     <div class="row justify-content-center">
         <div class="col-auto">
             <table class="table table-sm table-hover table-striped table-responsive"  id="resultTable">
-                <caption>실공고 목록</caption>
                 <thead class="text-center">
                     <tr>
                         <th>공고일</th>
@@ -271,10 +273,14 @@ PREHTML;
             </table>
         </div>
     </div>
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <h5 class="mb-0">사전규격</h5>
+    </div>
+</div>
     <div class="row justify-content-center mt-4">
         <div class="col-auto">
             <table class="table table-sm table-hover table-striped table-responsive" id="resultTablePre">
-                <caption>사전규격 목록</caption>
                 <thead class="text-center">
                 <tr>
                     <th>분류</th>
@@ -298,7 +304,7 @@ TABLE;
 }
 ?>
 
-<!-- 키워드 목록 모달-->
+<!-- 키워드 삭제 모달-->
 <div class="modal fade" id="keywordModal" data-backdrop="static" tabindex="-2" role="dialog" aria-labelledby="keywordModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -310,6 +316,7 @@ TABLE;
             </div>
             <div class="modal-body">
                 <form method="POST">
+                    <p class="form-text text-danger float-right"><strong>삭제</strong> 버튼을 누르면 즉시 삭제됩니다!</p>
                   <?php
                   for ($i = 0; $i < $xmlCount; $i++) {
                       $nodeValue = $keyword[$i]->nodeValue;
