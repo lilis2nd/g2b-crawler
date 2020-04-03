@@ -8,7 +8,7 @@ span + span { margin-left: 0.5rem; }
 .badge { padding-top: 0.35em; }
 .badge-pill { padding-right: 1.6em; padding-left: 1.6em; }
 
-table#resultTable, table#resultTablePre { font-size: 0.85rem; min-width: 60%; }
+table#resultTable, table#resultTablePre { font-size: 0.85rem; min-width: 80%; }
 table#resultTable th, table#resultTablePre th { font-weight: 700; word-break: keep-all; word-break-cjk: keep-all; }
 table#resultTable tr td:first-child,
 table#resultTable tr td:nth-child(3),
@@ -19,4 +19,8 @@ table#resultTable tr td:last-child { text-align: center; }
 #resultTable_length > label:nth-child(1),
 #resultTable_filter > label:nth-child(1),
 #resultTable_info,
-#resultTable_paginate{ font-size: 0.85rem;}
+#resultTable_paginate,
+#resultTablePre_length > label:nth-child(1),
+#resultTablePre_filter > label:nth-child(1),
+#resultTablePre_info,
+#resultTablePre_paginate{ font-size: 0.85rem;}

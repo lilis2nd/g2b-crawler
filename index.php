@@ -1,7 +1,12 @@
 <?php
+
+require 'srcs/simplehtmldom_1_9_1/simple_html_dom.php';
+
 // Form - Date
 $startDate = date('Y-m-d', time() - (7 * 24 * 60 * 60));
 $endDate = date('Y-m-d');
+$startDatePre = DateTime::createFromFormat('Y-m-d', $startDate)->format('Y/m/d');
+$endDatePre = DateTime::createFromFormat('Y-m-d', $endDate)->format('Y/m/d');
 
 // XML
 $xmlFile = 'keywords.xml';
@@ -53,6 +58,7 @@ if (isset($_POST['buttonSearch'])) {
   $inqryEndDt = date("Ymd", strtotime($_POST['inputEndDate'])) . '0000';
 
     $html = '';
+	$preHtml = '';
 	for ($i = 0; $i < $xmlCount; $i++) {
 //	    실공고 - 용역
 		$ch = curl_init();
@@ -117,8 +123,40 @@ if (isset($_POST['buttonSearch'])) {
 			$html .= "<td><a href='{$item->bidNtceDtlUrl}' target='_blank'><i class=\"fas fa-link\"></i></a></td>";
 			$html .= '</tr>';
 		}
+
+			// 사전공고
+			$preDetailUrl = "https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdDtl.do?preStdRegNo=";
+			$preUrl = "http://www.g2b.go.kr:8341/bs/beffatStndrdSearchList.do?cntcSysTyCode=&instCd=&instCl=2&instNm=&prodNm={$keyword[$j]->nodeValue}&rcptDtFrom=$startDatePre&rcptDtTo=$endDatePre&recordCountPerPage=100&searchClCd=search1&swbizTgYn=&taskClCd=0";
+			$xmlRawPreData = file_get_html($preUrl);
+
+			$countPre = count($xmlRawPreData->find('table',0)->children(2)->children());
+			for ($k = 0; $k < $countPre; $k++) {
+//                    echo $xmlRawPreData->find('table',0)->children(2)->children($k);
+//                  변수명 설정
+				$preCategory = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(0)->plaintext;
+				$preNumber = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(1)->plaintext;
+				$preName = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(2)->plaintext;
+				$preOrg = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(3)->plaintext;
+				$preOpenDate = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(4)->plaintext;
+				$preEndDate = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(5)->plaintext;
+				$preType = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(6)->plaintext;
+
+				$preHtml .= <<<PREHTML
+<tr>
+    <td>$preCategory</td>
+    <td>$preNumber</td>
+    <td>$preName</td>
+    <td>$preOrg</td>
+    <td>$preOpenDate</td>
+    <td>$preEndDate</td>
+    <td>$preType</td>
+    <td><a href="{$preDetailUrl}{$preNumber}" target="_blank"><i class="fas fa-link"></i></a></td>
+</tr>
+PREHTML;
+			}
 	}
 }
+
 ?>
 <!doctype html>
 <html lang="ko">
@@ -141,6 +179,24 @@ if (isset($_POST['buttonSearch'])) {
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
+    <div class="collpase navbar-collapse" id="navbar">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="https://docs.google.com/spreadsheets/d/1Er-om31yxj8tuFQ6ls2sRXTf3gr_qQ4tmjQIsMotoqI/edit#gid=0" target="_blank">내부검토</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    외부연결
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="//www.g2b.go.kr" target="_blank">나라장터</a>
+                    <a class="dropdown-item" href="//rfp.g2b.go.kr" target="_blank">나라장터 RFP</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="//ebid.kwater.or.kr" target="_blank">한국수자원공사 전자발주</a>
+                </div>
+            </li>
+        </ul>
+    </div>
 </nav>
 
 <section class="mt-4 container">
@@ -149,9 +205,11 @@ if (isset($_POST['buttonSearch'])) {
             <label class="col-sm-2 col-form-label">날짜범위</label>
             <div class="form-group col-sm-5">
                 <input type="date" class="form-control" name="inputStartDate" value="<?= $startDate; ?>"/>
+                <small class="form-text text-muted">시작일</small>
             </div>
             <div class="form-group col-sm-5">
                 <input type="date" class="form-control" name="inputEndDate" value="<?= $endDate; ?>"/>
+                <small class="form-text text-muted">종료일</small>
             </div>
         </div>
         <div class="row">
@@ -173,7 +231,7 @@ if (isset($_POST['buttonSearch'])) {
                 <button type="button" class="btn btn-outline-info btn-block btn-sm" data-toggle="modal" data-target="#addModal">키워드 추가</button>
             </div>
             <div class="col-sm-2">
-                <button type="button" class="btn btn-outline-danger btn-block btn-sm" data-toggle="modal" data-target="#keywordModal">키워드 수정/삭제</button>
+                <button type="button" class="btn btn-outline-danger btn-block btn-sm" data-toggle="modal" data-target="#keywordModal">키워드 삭제</button>
             </div>
         </div>
         <div class="row mt-4">
@@ -185,6 +243,9 @@ if (isset($_POST['buttonSearch'])) {
 </section>
 
 <hr class="container" />
+
+<?php if(isset($_POST['buttonSearch'])) {
+	echo <<<TABLE
 
 <!-- 결과 테이블 -->
 <section class="container-fluid mt-2">
@@ -205,7 +266,7 @@ if (isset($_POST['buttonSearch'])) {
                     </tr>
                 </thead>
                 <tbody>
-                <?= $html; ?>
+                $html
                 </tbody>
             </table>
         </div>
@@ -216,22 +277,26 @@ if (isset($_POST['buttonSearch'])) {
                 <caption>사전규격 목록</caption>
                 <thead class="text-center">
                 <tr>
-                    <th>No.</th>
-                    <th>공고일</th>
-                    <th>공고번호</th>
-                    <th>공고</th>
                     <th>분류</th>
+                    <th>사전규격번호</th>
+                    <th>공고명</th>
                     <th>수요기관</th>
+                    <th>공개일</th>
                     <th>마감일</th>
+                    <th>형태</th>
                     <th>링크</th>
                 </tr>
                 </thead>
                 <tbody>
+                $preHtml
                 </tbody>
             </table>
         </div>
     </div>
 </section>
+TABLE;
+}
+?>
 
 <!-- 키워드 목록 모달-->
 <div class="modal fade" id="keywordModal" data-backdrop="static" tabindex="-2" role="dialog" aria-labelledby="keywordModalTitle" aria-hidden="true">
@@ -268,12 +333,12 @@ HTML;
 </div>
 
 <!--키워드 추가 모달 -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalBody" aria-hidden="true">
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalBody" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form method="post">
                 <div class="modal-body">
-                    <p id="deleteModalBody">추가할 키워드를 입력해 주세요.</p>
+                    <p id="addModalBody">추가할 키워드를 입력해 주세요.</p>
                     <input type="text" class="form-control is-valid" name="inputAddKeyword" />
                 </div>
                 <div class="modal-footer">
@@ -294,9 +359,11 @@ $(document).ready(function() {
     $('#resultTable').DataTable({
         "order": [[ 0, "desc" ]]
     });
+
+    $('#resultTablePre').DataTable({
+        "order": [[ 4, "desc" ]]
+    });
 });
 </script>
-<?php
-?>
 </body>
 </html>
