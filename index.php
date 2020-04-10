@@ -126,30 +126,28 @@ if (isset($_POST['buttonSearch'])) {
 
 			// 사전공고
 			$preDetailUrl = "https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdDtl.do?preStdRegNo=";
-			$preUrl = "http://www.g2b.go.kr:8341/bs/beffatStndrdSearchList.do?cntcSysTyCode=&instCd=&instCl=2&instNm=&prodNm={$keyword[$j]->nodeValue}&rcptDtFrom=$startDatePre&rcptDtTo=$endDatePre&recordCountPerPage=100&searchClCd=search1&swbizTgYn=&taskClCd=0";
+//			$preUrl = "http://www.g2b.go.kr:8341/bs/beffatStndrdSearchList.do?cntcSysTyCode=&instCd=&instCl=2&instNm=&prodNm=" . urlencode($keyword[$j]->nodeValue) . "&rcptDtFrom=$startDatePre&rcptDtTo=$endDatePre&recordCountPerPage=100&searchClCd=search1&swbizTgYn=&taskClCd=0";
+            $preUrl = "https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdPublishList.do?dminstCd=&fromRcptDt=" .urlencode($startDatePre) . "&instCl=2&instNm=&orderbyItem=1&prodNm=" . urlencode(iconv("utf-8", "euc-kr", $keyword[$j]->nodeValue)) . "&recordCountPerPage=100&searchDetailPrdnm=&searchDetailPrdnmNo=&searchType=1&supplierLoginYn=N&swbizTgYn=&taskClCd=5&taskClCds=5&toRcptDt=" . urlencode($endDatePre);
+//			https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdPublishList.do?dminstCd=&fromRcptDt=2020%2F04%2F01&instCl=2&instNm=&orderbyItem=1&prodNm=%B0%A1%BB%F3%C7%F6%BD%C7&recordCountPerPage=100&searchDetailPrdnm=&searchDetailPrdnmNo=&searchType=1&supplierLoginYn=N&swbizTgYn=&taskClCd=5&taskClCds=5&toRcptDt=2020%2F04%2F08
 			$xmlRawPreData = file_get_html($preUrl);
 
 			$countPre = count($xmlRawPreData->find('table',0)->children(2)->children());
 			for ($k = 0; $k < $countPre; $k++) {
-//                    echo $xmlRawPreData->find('table',0)->children(2)->children($k);
 //                  변수명 설정
-				$preCategory = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(0)->plaintext;
 				$preNumber = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(1)->plaintext;
-				$preName = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(2)->plaintext;
-				$preOrg = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(3)->plaintext;
-				$preOpenDate = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(4)->plaintext;
-				$preEndDate = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(5)->plaintext;
+				$preRefNo = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(2)->plaintext;
+				$preTitle = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(3)->plaintext;
+				$preOrg = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(4)->plaintext;
+				$preOpenDate = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(5)->plaintext;
 				$preType = $xmlRawPreData->find('table',0)->children(2)->children($k)->children(6)->plaintext;
 
 				$preHtml .= <<<PREHTML
 <tr>
-    <td>$preCategory</td>
     <td>$preNumber</td>
-    <td>$preName</td>
+    <td>$preRefNo</td>
+    <td>$preTitle</td>
     <td>$preOrg</td>
     <td>$preOpenDate</td>
-    <td>$preEndDate</td>
-    <td>$preType</td>
     <td><a href="{$preDetailUrl}{$preNumber}" target="_blank"><i class="fas fa-link"></i></a></td>
 </tr>
 PREHTML;
@@ -283,13 +281,12 @@ PREHTML;
             <table class="table table-sm table-hover table-striped table-responsive" id="resultTablePre">
                 <thead class="text-center">
                 <tr>
-                    <th>분류</th>
+<!--                    <th>No.</th>-->
                     <th>사전규격번호</th>
+                    <th>참조번호</th>
                     <th>공고명</th>
                     <th>수요기관</th>
                     <th>공개일</th>
-                    <th>마감일</th>
-                    <th>형태</th>
                     <th>링크</th>
                 </tr>
                 </thead>
