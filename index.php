@@ -1,6 +1,7 @@
 <?php
 
 require 'srcs/simplehtmldom_1_9_1/simple_html_dom.php';
+require 'assets/servicekey.php';
 
 // Form - Date
 $startDate = date('Y-m-d', time() - (7 * 24 * 60 * 60));
@@ -8,7 +9,7 @@ $endDate = date('Y-m-d');
 $startDatePre = DateTime::createFromFormat('Y-m-d', $startDate)->format('Y/m/d');
 $endDatePre = DateTime::createFromFormat('Y-m-d', $endDate)->format('Y/m/d');
 
-// XML
+// XML base
 $xmlFile = 'keywords.xml';
 $xml = new DOMDocument('1.0', "utf-8");
 $xml->preserveWhiteSpace = false;
@@ -16,10 +17,10 @@ $xml->load($xmlFile);
 $xml->formatOutput = true;
 $xpath = new DOMXPath($xml);
 
-// 키워드 추가
+// Add keyword
 if (isset($_POST['inputAddKeyword'])) {
     $newKeyword = trim($_POST['inputAddKeyword']);
-//    중복검사
+//    Check for duplicates
     if (count($xpath->query("//keyword[text()=\"$newKeyword\"]")) == 1) {
         echo ("<script>alert('이미 등록된 키워드입니다.');</script>");
     } else {
@@ -30,7 +31,7 @@ if (isset($_POST['inputAddKeyword'])) {
     }
 }
 
-// 키워드 삭제
+// Delete keyword
 if (isset($_POST['buttonDelete'])) {
     $deleteKeyword = $_POST['buttonDelete'];
     if (count($xpath->query("//keyword[text()=\"$deleteKeyword\"]")) == 1) {
@@ -44,26 +45,25 @@ if (isset($_POST['buttonDelete'])) {
 $keyword = $xml->documentElement->getElementsByTagName('keyword');
 $xmlCount = $keyword->length;
 
-// Setting - Currency
+// Setting - Currency format
 $moneyFormat = new NumberFormatter("ko_KR", NumberFormatter::CURRENCY);
 $moneyFormat->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 42);
 $moneyFormat->setSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL,",");
 
 // Setting - Date
-
 /// Search logic
 if (isset($_POST['buttonSearch'])) {
-//    실공고 검색 및 데이터 취합
+//    Real order search
   $inqryBgnDt = date("Ymd", strtotime($_POST['inputStartDate'])) . '0000';
   $inqryEndDt = date("Ymd", strtotime($_POST['inputEndDate'])) . '0000';
 
     $html = '';
 	$preHtml = '';
+//  Real order - Service
 	for ($i = 0; $i < $xmlCount; $i++) {
-//	    실공고 - 용역
 		$ch = curl_init();
 		$url = 'http://apis.data.go.kr/1230000/BidPublicInfoService/getBidPblancListInfoServcPPSSrch'; /*URL*/
-		$queryParams = '?' . urlencode('ServiceKey') . '=niPQKI7SOhepuEQsEv1Vfh%2B%2BJFh0gdBf%2FRlRVTecK02b0Vo14WBT9%2F5zFw4gIo50GPdcYe37txYZPIGsj1%2Fqbg%3D%3D'; /*Service Key*/
+		$queryParams = '?' . urlencode('ServiceKey') . $key; /*Service Key*/
 		$queryParams .= '&' . urlencode('numOfRows') . '=' . urlencode('30'); /* 페이지별 출력수 */
 		$queryParams .= '&' . urlencode('pageNo') . '=' . urlencode('1');
 		$queryParams .= '&' . urlencode('inqryDiv') . '=' . urlencode('1');
@@ -92,11 +92,11 @@ if (isset($_POST['buttonSearch'])) {
         }
 	}
 
+//	Real order - Construction
 	for ($j = 0; $j < $xmlCount; $j++) {
-//	    실공고 - 공사
 		$ch = curl_init();
 		$url = 'http://apis.data.go.kr/1230000/BidPublicInfoService/getBidPblancListInfoCnstwkPPSSrch'; /*URL*/
-		$queryParams = '?' . urlencode('ServiceKey') . '=niPQKI7SOhepuEQsEv1Vfh%2B%2BJFh0gdBf%2FRlRVTecK02b0Vo14WBT9%2F5zFw4gIo50GPdcYe37txYZPIGsj1%2Fqbg%3D%3D'; /*Service Key*/
+		$queryParams = '?' . urlencode('ServiceKey') . $key; /*Service Key*/
 		$queryParams .= '&' . urlencode('numOfRows') . '=' . urlencode('30'); /* 페이지별 출력수 */
 		$queryParams .= '&' . urlencode('pageNo') . '=' . urlencode('1');
 		$queryParams .= '&' . urlencode('inqryDiv') . '=' . urlencode('1');
@@ -124,11 +124,9 @@ if (isset($_POST['buttonSearch'])) {
 			$html .= '</tr>';
 		}
 
-			// 사전공고
+			// Search Preorders
 			$preDetailUrl = "https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdDtl.do?preStdRegNo=";
-//			$preUrl = "http://www.g2b.go.kr:8341/bs/beffatStndrdSearchList.do?cntcSysTyCode=&instCd=&instCl=2&instNm=&prodNm=" . urlencode($keyword[$j]->nodeValue) . "&rcptDtFrom=$startDatePre&rcptDtTo=$endDatePre&recordCountPerPage=100&searchClCd=search1&swbizTgYn=&taskClCd=0";
             $preUrl = "https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdPublishList.do?dminstCd=&fromRcptDt=" .urlencode($startDatePre) . "&instCl=2&instNm=&orderbyItem=1&prodNm=" . urlencode(iconv("utf-8", "euc-kr", $keyword[$j]->nodeValue)) . "&recordCountPerPage=100&searchDetailPrdnm=&searchDetailPrdnmNo=&searchType=1&supplierLoginYn=N&swbizTgYn=&taskClCd=5&taskClCds=5&toRcptDt=" . urlencode($endDatePre);
-//			https://www.g2b.go.kr:8143/ep/preparation/prestd/preStdPublishList.do?dminstCd=&fromRcptDt=2020%2F04%2F01&instCl=2&instNm=&orderbyItem=1&prodNm=%B0%A1%BB%F3%C7%F6%BD%C7&recordCountPerPage=100&searchDetailPrdnm=&searchDetailPrdnmNo=&searchType=1&supplierLoginYn=N&swbizTgYn=&taskClCd=5&taskClCds=5&toRcptDt=2020%2F04%2F08
 			$xmlRawPreData = file_get_html($preUrl);
 
 			$countPre = count($xmlRawPreData->find('table',0)->children(2)->children());
