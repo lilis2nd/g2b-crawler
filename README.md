@@ -28,7 +28,7 @@ The code is very amateur and at elementary level, so I wouldn't review the code 
 4. `현재 키워드` 섹션에 지금 저장된 키워드들이 표시됩니다. `키워드 추가` 또는 `키워드 삭제` 버튼을 눌러 입맛에 맞게 검색 키워드를 설정합니다. 설정된 키워드는 `keywords.xml` 파일에 자동으로 저장됩니다.
 5. `검색` 버튼을 눌러 결과를 확인합니다.
 
-~~~
+---
 
 1. Close this repository and connect it to a web server.
 2. Create `servicekey.php` file inside the `assets` folder and put the below code.
