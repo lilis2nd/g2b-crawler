@@ -41,11 +41,10 @@ The code is very amateur and at elementary level, so I wouldn't review the code 
 5. Search and see results.
 
 ## 주의점 (Caution)
-* 근본 없는 프로그래밍입니다. 코드가 아주 조악합니다. 답답하실 수도 있습니다...
-* 회사 내부에서 사용하고자 만든 것이기 때문에 UI에 직접링크가 있습니다. 필요에 맞게 수정하시면 됩니다.
-
-* As stated above, the code used here is very amateur, and may not be good for your mental health.
-* This solution was intended for in-house use, so the UI has in-house direct links hardcoded. Modify it freely.
+* 근본 없는 프로그래밍입니다. 코드가 아주 조악합니다. 답답하실 수도 있습니다... \
+As stated above, the code used here is very amateur, and may not be good for your mental health.
+* 회사 내부에서 사용하고자 만든 것이기 때문에 UI에 직접링크가 있습니다. 필요에 맞게 수정하시면 됩니다. \
+This solution was intended for in-house use, so the UI has in-house direct links hardcoded in the navigation bar. Modify it freely.
 
 
 ## Thanks to...
