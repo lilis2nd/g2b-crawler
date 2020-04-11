@@ -1,6 +1,6 @@
 # 나라장터 다중키워드 검색기 (G2B Multi-keyword Search Solution)
 ## 소개
-당 솔루션은 조달청 나라장터(https://www.g2b.go.kr)의 실공고와 사전규격을 원하는 키워드로 일괄 검색하여 결과를 한 눈에 볼 수 있도록 하고자 합니다.
+당 솔루션은 [조달청 나라장터](https://www.g2b.go.kr)의 실공고와 사전규격을 원하는 키워드로 일괄 검색하여 결과를 한 눈에 볼 수 있도록 하고자 합니다.
 
 기존 Python 방식에 비해 별도의 파일이 저장되지 않고 웹상에서 간단히 보고 해당 공고의 직접연결 링크만 제공하고 있습니다. 실은 회사에서 매일 공고 검색을 하다보니 필요성을 느껴 슬쩍 만들었습니다.
 
@@ -15,7 +15,7 @@ The code is very amateur and at elementary level, so I wouldn't review the code 
 ## 요구사항 (Requirements)
 * PHP 7.2
 * 웹서버 (Webserver)
-* 공공데이터포탈(https://www.data.go.kr/) OpenAPI 인증키 (Open Data Portal OpenAPI public key)
+* [공공데이터포탈](https://www.data.go.kr/) OpenAPI 인증키 (Open Data Portal OpenAPI public key)
 
 ## 사용법 (Usage)
 1. 이 저장소를 클론하고 웹서버에 연결합니다.
